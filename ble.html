@@ -110,7 +110,9 @@
     style="display: grid; grid-template-columns: 1fr 1.5fr; grid-template-rows: 1fr 3fr; grid-gap: 1em; padding: 1em;">
     <div class="contentCon">
         <div style="width: 250px; height: 100px;">
-            <button id="connect" style="width: 100%; height: 100%;">Connect</button>
+            <button id="connect" style="width: 100%; height: 80%;">Connect</button>
+            <label for="message">Message</label>
+            <input id="message" type="text" maxlength="200">
         </div>
         <div class="logCon">
             <pre id="log1">
@@ -140,14 +142,21 @@
 
 
     <script>
+        const INGEST = "https://rundominium.asuscomm.com/api/ingest";
+        const TOKEN = "WtD0BWO_PEIdM8hek1UR0e_MvpeZF08DlqvEPrETdRM";
+        // in the fetch:
+        
         // On dom ready:
         let reading = {
             speed_left: 0,
             speed_right: 0,
             charge: 0,
             servo: 0,
+            message: "",
         }
-        const INGEST = "http://127.0.0.1:8001/api/ingest";
+        document.getElementById("message").addEventListener("input", e => {
+            reading.message = e.target.value;
+        });
         let lastSent = "";
 
         setInterval(async () => {
@@ -156,7 +165,7 @@
         try {
             const r = await fetch(INGEST, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: { "Content-Type": "application/json", "X-Token": TOKEN },
             body: JSON.stringify({ ...reading, t: Date.now() })
             });
             if (r.ok) lastSent = current;
