@@ -141,7 +141,28 @@
 
     <script>
         // On dom ready:
-        document.addEventListener("DOMContentLoaded", function () {
+        let reading = {
+            speed_left: 0,
+            speed_right: 0,
+            charge: 0,
+            servo: 0,
+        }
+        const INGEST = "http://127.0.0.1:8001/api/ingest";
+        let lastSent = "";
+
+        setInterval(async () => {
+        const current = JSON.stringify(reading);
+        if (current === lastSent || current === "{}") return;   // unchanged or empty
+        try {
+            const r = await fetch(INGEST, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ ...reading, t: Date.now() })
+            });
+            if (r.ok) lastSent = current;
+        } catch (e) { /* tunnel down, retry next tick */ }
+        }, 200);
+        document.addEventListener("DOMContentLoaded", function () { 
             // Get the connect button
             const connectButton = document.getElementById("connect");
 
@@ -306,21 +327,25 @@
                     const value = e.target.value.getInt32(0, true);
                     // log(`Charge received: ${(value).toFixed(2)}`,2);
                     log(`Charge received: ${(value*0.001).toFixed(2)}`,2);
+                    reading.charge = value*0.001;
                 });
                 await leftBeltCharacteristic.startNotifications();
                 leftBeltCharacteristic.addEventListener("characteristicvaluechanged", (e) => {
                     const value = e.target.value.getInt32(0, true);
                     log(`Left belt speed: ${(value).toFixed(2)}`,3);
+                    reading.speed_left = value;
                 });
                 await rightBeltCharacteristic.startNotifications();
                 rightBeltCharacteristic.addEventListener("characteristicvaluechanged", (e) => {
                     const value = e.target.value.getInt32(0, true);
                     log(`Right belt speed: ${(value).toFixed(2)}`,4);
+                    reading.speed_right = value;
                 });
                 await servoCharacteristic.startNotifications();
                 servoCharacteristic.addEventListener("characteristicvaluechanged", (e) => {
                     const value = e.target.value.getInt32(0, true);
                     log(`Servo angle: ${(value).toFixed(2)}`,1);
+                    reading.servo = value;
                 });
             }
 
