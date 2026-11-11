@@ -1,0 +1,453 @@
+<!-- Basic HTML5 -->
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>WebBLE</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+
+    <style type="text/css">
+        :root {
+            --slider-thumb-size: 90px;
+        }
+
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            box-sizing: border-box;
+        }
+
+        body>button,
+        body>div {
+            align-self: center;
+            justify-self: center;
+        }
+
+        .slider-container {
+            width: 100%;
+            height: var(--slider-thumb-size);
+            position: relative;
+            align-self: center;
+            justify-self: center;
+            max-width: 30em;
+        }
+
+        .slider-container.vertical {
+            width: var(--slider-thumb-size);
+            height: 100%;
+            max-height: 30em;
+        }
+
+        .slider-track {
+            width: 100%;
+            height: 50%;
+            background-color: #eee;
+            position: absolute;
+            top: 25%;
+            border-radius: 5px;
+        }
+
+        .vertical .slider-track {
+            width: 50%;
+            height: 100%;
+            top: 0;
+            left: 25%;
+        }
+
+        .slider-thumb {
+            width: var(--slider-thumb-size);
+            height: var(--slider-thumb-size);
+            background-color: #da7373;
+            border-radius: 50%;
+            position: absolute;
+            top: calc(50% - var(--slider-thumb-size) / 2);
+            cursor: pointer;
+            /* Initial position of the thumb */
+            left: calc(50% - var(--slider-thumb-size) / 2);
+            /* Transition slider thumb position */
+        }
+
+        pre {
+            box-sizing: border-box;
+            margin: 0;
+            /* height: 100%; */
+            padding: 1em;
+            overflow: auto;
+            /* height: 100%; */
+            border: 1px dashed gray;
+            border-radius: 0.5em;
+            height: 30vh;
+            width: 100%;
+            overflow-y: scroll;
+        }
+        .contentCon{
+            display: flex;
+            flex-direction: column;
+            align-content: center;
+            justify-content: center;
+            align-items: center;
+            width: 100vw;
+            height: 100%;
+        }
+        .logCon{
+            width: 80%;
+            /* display: flex; */
+            display: grid;
+            grid-template-columns: auto auto;
+            /* margin-left: 20%; */
+            /* padding-right: 20%; */
+            gap: 5px;
+            padding-top: 50px;
+            /* height:65vh; */
+        }
+    </style>
+</head>
+
+<body
+    style="display: grid; grid-template-columns: 1fr 1.5fr; grid-template-rows: 1fr 3fr; grid-gap: 1em; padding: 1em;">
+    <div class="contentCon">
+        <div style="width: 250px; height: 100px;">
+            <button id="connect" style="width: 100%; height: 100%;">Connect</button>
+        </div>
+        <div class="logCon">
+            <pre id="log1">
+                Not connected
+            </pre>
+            <pre id="log2">
+                Not connected
+            </pre>
+        <pre id="log3">
+            Not connected
+        </pre>
+        <pre id="log4">
+            Not connected
+        </pre>
+    </div>
+    
+</div>
+    <div class="slider-container vertical" id="slider1" style="display:none;">
+        <div class="slider-track"></div>
+
+        <div class="slider-thumb"></div>
+    </div>
+    <div class="slider-container horizontal" id="slider2" style="display:none;">
+        <div class="slider-track"></div>
+        <div class="slider-thumb"></div>
+    </div>
+
+
+    <script>
+        // On dom ready:
+        document.addEventListener("DOMContentLoaded", function () {
+            // Get the connect button
+            const connectButton = document.getElementById("connect");
+
+            let make_slider = (container, vertical, keycodeHigh, keycodeLow) => {
+                const thumb = container.querySelector(".slider-thumb");
+
+                let isDragging = false;
+
+                let startX = 0;
+                let startY = 0;
+
+                const setValue = (value, animate) => {
+                    const sliderWidth = container.offsetWidth;
+                    const sliderHeight = container.offsetHeight;
+
+                    value = Math.max(-1, Math.min(1, value))
+
+                    if (animate) {
+                        thumb.style.transition = "transform 0.2s";
+                    } else {
+                        thumb.style.transition = "";
+                    }
+                    if (vertical) {
+                        const newY = -value * sliderHeight / 2;
+                        thumb.style.transform = `translateY(${newY}px)`;
+                    } else {
+                        const newX = value * sliderWidth / 2;
+                        thumb.style.transform = `translateX(${newX}px)`;
+                    }
+
+                    // Dispatch event with value
+                    const event = new CustomEvent("slider-value-changed", {
+                        detail: {
+                            value: value
+                        }
+                    });
+                    container.dispatchEvent(event);
+                }
+
+                // Function to update the thumb's position
+                const moveThumb = (e) => {
+                    const sliderWidth = container.offsetWidth;
+                    const sliderHeight = container.offsetHeight;
+                    thumb.style.transition = "";
+                    if (isDragging) {
+                        if (vertical) {
+                            const newY = e.pageY - startY;
+                            setValue(2 * -newY / sliderHeight, false);
+                        } else {
+                            const newX = e.pageX - startX;
+                            setValue(2 * newX / sliderWidth, false);
+                        }
+                        e.preventDefault?.call(e)
+                    }
+                };
+
+                // Start dragging
+                thumb.addEventListener('mousedown', (e) => {
+                    isDragging = true;
+                    startX = e.pageX;
+                    startY = e.pageY;
+                    moveThumb(e);
+                    console.log("Mouse down");
+                });
+
+                // Moving the thumb
+                document.addEventListener('mousemove', moveThumb);
+
+                // Stop dragging
+                document.addEventListener('mouseup', () => {
+                    if (isDragging) {
+                        isDragging = false;
+                        setValue(0, true);
+                    }
+                });
+
+                // For touch devices
+                let touchIdentifier = 0;
+                thumb.addEventListener('touchstart', (e) => {
+                    console.log("Touch start for  " + container.id);
+                    isDragging = true;
+                    touchIdentifier = e.changedTouches[0].identifier;
+                    // Find this in touches list
+                    console.log(e.touches)
+                    let touch = Array.prototype.find.call(e.touches, (touch) => touch.identifier == touchIdentifier);
+                    startX = touch.pageX;
+                    startY = touch.pageY;
+                }, { passive: true });
+
+                thumb.addEventListener('touchmove', (e) => {
+                    if (isDragging) {
+                        console.log("Touch move for  " + container.id);
+                        let touch = Array.prototype.find.call(e.touches, (touch) => touch.identifier == touchIdentifier);
+                        moveThumb(touch);
+                        e.preventDefault?.call(e)
+                    }
+                });
+
+                thumb.addEventListener('touchend', () => {
+                    if (isDragging) {
+                        isDragging = false;
+                        setValue(0, true);
+                    }
+                });
+
+                // For keypress
+                document.addEventListener('keydown', (e) => {
+                    if (e.repeat) return;
+                    if (e.keyCode == keycodeHigh) {
+                        setValue(1, true);
+                    } else if (e.keyCode == keycodeLow) {
+                        setValue(-1, true);
+                    }
+                });
+                document.addEventListener('keyup', (e) => {
+                    if (e.repeat) return;
+                    if (e.keyCode == keycodeHigh || e.keyCode == keycodeLow) {
+                        setValue(0, true);
+                    }
+                });
+            }
+
+            let speedSlider = document.getElementById("slider1");
+            let turnSlider = document.getElementById("slider2");
+            make_slider(speedSlider, true, 38, 40);
+            make_slider(turnSlider, false, 39, 37);
+
+            const log = (text, logID = 1) => {
+                const logElement = document.querySelector("#log" + logID.toString());
+                const atBottom = logElement.scrollHeight - logElement.scrollTop <= logElement.clientHeight + 1; // Adding a small threshold
+                logElement.innerText += "\n" + text;
+                console.log(text);
+
+                if (atBottom) {
+                    logElement.scrollTop = logElement.scrollHeight;
+                }
+            }
+
+            let connected = false;
+            let server;
+            let chargeCharacteristic;
+            let leftBeltCharacteristic;
+            let rightBeltCharacteristic;
+            let servoCharacteristic;
+            let DEPRECATED_DEPRECATED_turnCharacteristic;
+
+
+            async function connectServices() {
+                const service = await server.getPrimaryService("ef285d93-51b4-4996-b0d1-eade88331410");
+                chargeCharacteristic = await service.getCharacteristic("9e7e0c71-af3e-4e37-8ee1-16692a5a69c5");
+                leftBeltCharacteristic = await service.getCharacteristic("ff7999e2-68d2-49f3-9c56-9b97d91706c9");
+                rightBeltCharacteristic = await service.getCharacteristic("54117d2f-40e8-4ef5-a6e0-aa55bc6f9b04");
+                servoCharacteristic = await service.getCharacteristic("2ae8065a-53b1-4ee7-8427-0db91b7d9458");
+                
+
+
+                DEPRECATED_DEPRECATED_turnCharacteristic = await service.getCharacteristic("f8757a98-ba9e-49e9-bfc7-7885ee900dce");
+
+                // Listen for charge notifications from ESP32
+                await chargeCharacteristic.startNotifications();
+                chargeCharacteristic.addEventListener("characteristicvaluechanged", (e) => {
+                    const value = e.target.value.getInt32(0, true);
+                    // log(`Charge received: ${(value).toFixed(2)}`,2);
+                    log(`Charge received: ${(value*0.001).toFixed(2)}`,2);
+                });
+                await leftBeltCharacteristic.startNotifications();
+                leftBeltCharacteristic.addEventListener("characteristicvaluechanged", (e) => {
+                    const value = e.target.value.getInt32(0, true);
+                    log(`Left belt speed: ${(value).toFixed(2)}`,3);
+                });
+                await rightBeltCharacteristic.startNotifications();
+                rightBeltCharacteristic.addEventListener("characteristicvaluechanged", (e) => {
+                    const value = e.target.value.getInt32(0, true);
+                    log(`Right belt speed: ${(value).toFixed(2)}`,4);
+                });
+                await servoCharacteristic.startNotifications();
+                servoCharacteristic.addEventListener("characteristicvaluechanged", (e) => {
+                    const value = e.target.value.getInt32(0, true);
+                    log(`Servo angle: ${(value).toFixed(2)}`,1);
+                });
+            }
+
+            // When the connect button is clicked, connect to the device
+            connectButton.addEventListener("click", async () => {
+                if (connected) {
+                    // Disconnect
+                    connected = false;
+                    connectButton.innerText = "Connect";
+                    try {
+                        server.disconnect();
+                    } catch (error) {
+                        log("Error disconnecting: " + error);
+                    }
+                    return;
+                }
+                const options = {
+                    filters: [
+                        {
+                            services: ["ef285d93-51b4-4996-b0d1-eade88331410"]
+                        }
+                    ]
+                };
+                if (!navigator.bluetooth) {
+                    log("Error: Browser does not support Web Bluetooth");
+                    return
+                }
+                log("Looking for device...");
+                let device;
+                try {
+                    device = await navigator.bluetooth.requestDevice(options);
+                }  catch (error) {
+                    if (error instanceof DOMException) {
+                        log("No device found");
+                        return;
+                    }
+                    // dump error to a string
+                    let error_str = JSON.stringify(error, Object.getOwnPropertyNames(error));
+                    log("Error connecting: " + error_str);
+                    return;
+                }
+                
+                log("Device found");
+                console.log(device);
+                server = await device.gatt.connect();
+                log("Server connected");
+                await connectServices()
+                log("Speed and turn characteristics found");
+
+                connected = true;
+                connectButton.innerText = "Disconnect";
+            })
+
+            // When the speed slider is changed, update the characteristic
+            let writeInProgress = false;
+            let queuedSpeedValue = null;
+            let queuedTurnValue = null;
+
+            async function writeCharacteristics() {
+                if (!connected) return;
+                if (writeInProgress) return;
+                writeInProgress = true;
+
+                if (!server.connected) {
+                    log("Was disco1nnected, reconnecting")
+                    await server.connect()
+                    await connectServices();
+                    log("reconnected to characteristics")
+                }
+
+                try {
+                    if (queuedSpeedValue !== null) {
+                        let valueToWrite = queuedSpeedValue;
+                        queuedSpeedValue = null; // Clear the queued value
+                        await chargeCharacteristic.writeValueWithResponse(getFloat32Buffer(valueToWrite));
+                        log(`Speed written: ${valueToWrite}`);
+                    }
+
+
+                    if (queuedTurnValue !== null) {
+                        let valueToWrite = queuedTurnValue;
+                        queuedTurnValue = null; // Clear the queued value
+                        await DEPRECATED_turnCharacteristic.writeValueWithResponse(getFloat32Buffer(valueToWrite));
+                        log(`Turn written: ${valueToWrite}`);
+                    }
+                } catch (error) {
+                    console.error("Failed to write:", error);
+                    log("Failed to write");
+                } finally {
+                    writeInProgress = false; // Reset the flag
+                    if (queuedSpeedValue !== null || queuedTurnValue !== null) {
+                        writeCharacteristics();
+                    }
+                }
+            }
+
+            speedSlider.addEventListener("slider-value-changed", async (e) => {
+                queuedSpeedValue = e.detail.value;
+                writeCharacteristics();
+            });
+
+            turnSlider.addEventListener("slider-value-changed", async (e) => {
+                queuedTurnValue = e.detail.value;
+                writeCharacteristics();
+            });
+
+            // Catch any uncaught errors and exceptions
+            window.addEventListener("error", (e) => { // For uncaught errors
+                log("Error: " + e.message);
+            });
+            window.addEventListener("unhandledrejection", (e) => {
+                console.log(e)
+                log("Unexpected error: " + e.reason);
+                log(e)
+            });
+        })
+        function getFloat32Buffer(value) {
+            let buffer = new ArrayBuffer(4); // 32 bits = 4 bytes
+            let view = new DataView(buffer);
+
+            // Set the float value into the buffer
+            // Arguments: byteOffset, value, littleEndian
+            // Adjust `littleEndian` according to your device's specification
+            view.setFloat32(0, value, true); // Assuming little-endian format
+
+            return buffer;
+        }
+    </script>
+
+</html>
