@@ -154,9 +154,7 @@
             servo: 0,
             message: "",
         }
-        document.getElementById("message").addEventListener("input", e => {
-            reading.message = e.target.value;
-        });
+
         let lastSent = "";
 
         setInterval(async () => {
@@ -174,7 +172,9 @@
         document.addEventListener("DOMContentLoaded", function () { 
             // Get the connect button
             const connectButton = document.getElementById("connect");
-
+            document.getElementById("message").addEventListener("input", e => {
+            reading.message = e.target.value;
+        });
             let make_slider = (container, vertical, keycodeHigh, keycodeLow) => {
                 const thumb = container.querySelector(".slider-thumb");
 
