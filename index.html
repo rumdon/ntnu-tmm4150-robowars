@@ -11,6 +11,7 @@
     <style type="text/css">
         :root {
             --slider-thumb-size: 90px;
+            --u: min(1px, (100vw - 80px) / 900);
         }
 
         html,
@@ -189,9 +190,11 @@
             0%{
                 opacity: 20%;
                 box-shadow: none;
+                filter:blur(4px);
             }
             100%{
                 opacity: inherit;
+                filter:blur(1px);
             }
         }
 
@@ -244,13 +247,14 @@
         }
         :root {
     /* 1px at 900px content width, smaller below that (40px = body padding) */
-    --u: min(1px, (100vw - 40px) / 900);
+    /* --u: min(1px, (100vw - 40px) / 900); */
     --slider-thumb-size: calc(90 * var(--u));
 }
 
 .contentCon {
     border: calc(19 * var(--u)) ridge #2828282b;
-    margin: calc(-30 * var(--u));
+    margin: calc(-60 * var(--u));
+    /* min-width: 0; */
 }
 
 .logCon {
@@ -311,6 +315,25 @@
 }
 @container style(--pip: 6) {
     .batteryCon>div:nth-child(-n+5) { animation-timing-function: steps(1,end) !important; }
+}
+.contentCon {
+    flex: 1 1 0;
+    min-width: 0;
+    grid-template-columns: minmax(0, 11fr) 1fr;
+}
+
+.terminal {
+    overflow-wrap: anywhere;
+    overflow-y: hidden;
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: flex-start;
+    justify-content: flex-end;
+}
+.terminal::after {
+    content: "";
+    flex-grow: 1;
 }
     </style>
 </head>
@@ -379,17 +402,17 @@ const mod = (n, m) => ((n % m) + m) % m;
 
 let terminal_counter = 0;
 
-setInterval(()=>{
-    tread_offset_left = mod(tread_offset_left + val_to_offset_shift(latest_d.speed_left),0.5);
-    tread_offset_right = mod(tread_offset_right + val_to_offset_shift(latest_d.speed_right),0.5);
+// setInterval(()=>{
+//     tread_offset_left = mod(tread_offset_left + val_to_offset_shift(latest_d.speed_left),0.5);
+//     tread_offset_right = mod(tread_offset_right + val_to_offset_shift(latest_d.speed_right),0.5);
 
 
-    document.getElementById("tread_inner_left").style="--deg: -10deg; --offset: " + (-tread_offset_left).toString() +"; filter: blur(" + (Math.abs(latest_d.speed_left)/64 -2).toString() + "px); --speed: " + latest_d.speed_left.toString();
-    document.getElementById("tread_inner_right").style="--deg: 10deg; --offset: " + (-tread_offset_right).toString() +"; filter: blur(" + (Math.abs(latest_d.speed_right)/64 -2).toString() + "px); --speed: " + latest_d.speed_right.toString();
+//     document.getElementById("tread_inner_left").style="--deg: -10deg; --offset: " + (-tread_offset_left).toString() +"; filter: blur(" + (Math.abs(latest_d.speed_left)/64 -2).toString() + "px); --speed: " + latest_d.speed_left.toString();
+//     document.getElementById("tread_inner_right").style="--deg: 10deg; --offset: " + (-tread_offset_right).toString() +"; filter: blur(" + (Math.abs(latest_d.speed_right)/64 -2).toString() + "px); --speed: " + latest_d.speed_right.toString();
 
-    document.getElementById("battery").style="--pip: " + charge_to_pip(latest_d.charge).toString();
+//     document.getElementById("battery").style="--pip: " + charge_to_pip(latest_d.charge).toString();
     
-},1000/Hz);
+// },1000/Hz);
 
 setInterval(async () => {
     latest_d.speed_left +=5;    
