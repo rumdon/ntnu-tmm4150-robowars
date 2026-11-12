@@ -5,8 +5,8 @@
 <head>
     <title>WebBLE</title>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-
+    <!-- <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"> -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <style type="text/css">
         :root {
@@ -15,6 +15,7 @@
 
         html,
         body {
+            background-image: repeating-radial-gradient(#6c3b3b40, transparent 23px);
             height: 100%;
             margin: 0;
             box-sizing: border-box;
@@ -94,7 +95,7 @@
             align-content: center;
             justify-content: center;
             align-items: center;
-            width: 100vw;
+            /* width: 100vw; */
             border: 19px ridge #2828282b;
             /* height: 80%; */
             margin: -30px;
@@ -241,6 +242,51 @@
         pointer-events: none; /* Crucial: lets clicks pass through to children */
         z-index: 1;
         }
+        :root {
+    /* 1px at 900px content width, smaller below that (40px = body padding) */
+    --u: min(1px, (100vw - 40px) / 900);
+    --slider-thumb-size: calc(90 * var(--u));
+}
+
+.contentCon {
+    border: calc(19 * var(--u)) ridge #2828282b;
+    margin: calc(-30 * var(--u));
+}
+
+.logCon {
+    padding-top: calc(50 * var(--u));
+}
+
+.bodyCon {
+    width: calc(900 * var(--u));
+    justify-content: center;
+}
+
+.terminal {
+    height: calc(400 * var(--u));
+    border: calc(8 * var(--u)) ridge #00000069;
+    font-size: calc(48 * var(--u)); /* xxx-large = 48px */
+    padding: calc(50 * var(--u));
+    margin: calc(25 * var(--u));
+}
+
+.batteryCon {
+    width: calc(50 * var(--u));
+    border: calc(9 * var(--u)) ridge #04090e78;
+    border-radius: calc(20 * var(--u));
+    margin-right: calc(20 * var(--u));
+}
+
+.tread {
+    width: calc(130 * var(--u));
+    min-width: calc(130 * var(--u));
+    height: calc(700 * var(--u));
+    border-radius: calc(30 * var(--u));
+}
+
+.tread>div {
+    background-image: repeating-linear-gradient(calc(var(--clamped-speed) * var(--deg)), #150000, #6d5e5e calc(30 * var(--u) + 15 * var(--u) * var(--clamped-speed)), #150000 calc(60 * var(--u)));
+}
     </style>
 </head>
 
@@ -308,17 +354,17 @@ const mod = (n, m) => ((n % m) + m) % m;
 
 let terminal_counter = 0;
 
-setInterval(()=>{
-    tread_offset_left = mod(tread_offset_left + val_to_offset_shift(latest_d.speed_left),0.5);
-    tread_offset_right = mod(tread_offset_right + val_to_offset_shift(latest_d.speed_right),0.5);
+// setInterval(()=>{
+//     tread_offset_left = mod(tread_offset_left + val_to_offset_shift(latest_d.speed_left),0.5);
+//     tread_offset_right = mod(tread_offset_right + val_to_offset_shift(latest_d.speed_right),0.5);
 
 
-    document.getElementById("tread_inner_left").style="--deg: -10deg; --offset: " + (-tread_offset_left).toString() +"; filter: blur(" + (Math.abs(latest_d.speed_left)/64 -2).toString() + "px); --speed: " + latest_d.speed_left.toString();
-    document.getElementById("tread_inner_right").style="--deg: 10deg; --offset: " + (-tread_offset_right).toString() +"; filter: blur(" + (Math.abs(latest_d.speed_right)/64 -2).toString() + "px); --speed: " + latest_d.speed_right.toString();
+//     document.getElementById("tread_inner_left").style="--deg: -10deg; --offset: " + (-tread_offset_left).toString() +"; filter: blur(" + (Math.abs(latest_d.speed_left)/64 -2).toString() + "px); --speed: " + latest_d.speed_left.toString();
+//     document.getElementById("tread_inner_right").style="--deg: 10deg; --offset: " + (-tread_offset_right).toString() +"; filter: blur(" + (Math.abs(latest_d.speed_right)/64 -2).toString() + "px); --speed: " + latest_d.speed_right.toString();
 
-    document.getElementById("battery").style="--pip: " + charge_to_pip(latest_d.charge).toString();
+//     document.getElementById("battery").style="--pip: " + charge_to_pip(latest_d.charge).toString();
     
-},1000/Hz);
+// },1000/Hz);
 
 setInterval(async () => {
     latest_d.speed_left +=5;    
