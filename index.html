@@ -438,11 +438,11 @@ setInterval(async () => {
             if (d[k] !== undefined) document.getElementById(k).textContent = "#" + `${k}: ${d[k]}` + extra_string;
 
         }else if(k=="charge"){
-            if (d[k] !== undefined) document.getElementById(k).textContent =  "#" + `${k}: ${d[k]}`+ "V";
+            if (d[k] !== undefined) document.getElementById(k).textContent =  "#" + `${k}: ${d[k].toFixed(2)}`+ "V";
         }else if(k=="servo"){
-            if (d[k] !== undefined) document.getElementById(k).textContent =  "#" + `${k}: ${d[k]}`+ "°";
+            if (d[k] !== undefined) document.getElementById(k).textContent =  "#" + `${k}: ${d[k].toFixed(0)}`+ "°";
         }else{
-            if (d[k] !== undefined) document.getElementById(k).textContent =  "#" + `${k}: ${d[k]}`;
+            if (d[k] !== undefined) document.getElementById(k).textContent =  "#" + `${k}: ${d[k].toFixed(0)}`;
         }
       if (d[k] !== undefined) latest_d[k] = d[k];
     }
