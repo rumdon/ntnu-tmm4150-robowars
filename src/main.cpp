@@ -2,7 +2,6 @@
 #include <ELRS.h>
 #include <ble.h>
 #include <Adafruit_MCP3008.h>
-// #include <Servo.h>
 #include <ESP32Servo.h>
 
 int activePWMChannels = 0;
@@ -53,16 +52,12 @@ class motor : public powerConsumer{
       : motorType(type_of_motor), pin{pin1,pin2,pin3}, isActive(false)
     {    
       if(motorType == DC_M){
-        // pinMode(pin[0],OUTPUT);
-        // pinMode(pin[1],OUTPUT);
         ledcAttachChannel(pin[0],20000,8, activePWMChannels++);
         ledcAttachChannel(pin[1],20000,8,activePWMChannels++);
       }
       if(motorType == SERVO_M){
         // pinMode(pin[0],OUTPUT);
         servo = new Servo();
-        // servo->setPeriodHertz(50);
-        // servo->attach(pin[0]);
         ledcAttachChannel(pin[0], 50, 14, activePWMChannels++);
       }
     }
@@ -135,7 +130,6 @@ class powerManager{
     void measureBattery(){
       if(millis()-powerConsumersLastActive>250){
         adcBatteryBuffer[adcBatteryBufferPointer++%bufSize] = adc.readADC(batteryVoltageCh);
-        // adcBatteryBuffer[adcBatteryBufferPointer++%bufSize] = analogRead(5);
       }
     }
     void checkPowerConsumersActive(){
@@ -199,11 +193,6 @@ class powerManager{
 
     int getLastRawBatteryRead(){
       return adc.readADC(batteryVoltageCh);
-      if(adcBatteryBufferPointer > 0 ){
-        return adcBatteryBuffer[(adcBatteryBufferPointer-1)%bufSize];
-      }else{
-        return -1;
-      }
     }
 
     void task(){
@@ -252,10 +241,6 @@ void loop() {
   bleTask();
   ELRSTask();
   pm.task();
-  
-  // if(INTERVAL(250)){
-  //   Serial.println(analogRead(7));
-  // }
 
   if(INTERVAL(50) && crsf.isLinkUp() && millis()>3000){
     /*
@@ -284,20 +269,11 @@ void loop() {
       sendServo(servo_angle);
     };
   }
+
+  // ::::::: TELEMETRY :::::::
   if(INTERVAL(500)){
     sendCharge(pm.getBatteryVoltage()*1000);
     Serial.println(pm.getBatteryVoltage());
-    // Serial.println(pm.getLastRawBatteryRead());
-    // Serial.print("\n");
-    // Serial.println("-----------------------");
-
-    // for (size_t i = 0; i < 8; i++)
-    // {
-    //   Serial.print(pm.readADCChannel(i));
-    //   Serial.print(" ");
-    // }
-    // Serial.println(analogRead(5));
-    // Serial.println("-----------------------");
   }
 }
 

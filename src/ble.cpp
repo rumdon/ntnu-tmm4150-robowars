@@ -40,9 +40,6 @@ void setupBLE(){
   pCharacteristicTurn = pService->createCharacteristic(
     turnCharacteristicUUID, BLECharacteristic::PROPERTY_WRITE);
 
-  // pCharacteristicCharge->addDescriptor(new BLE2902());
-  // pCharacteristicLeftBelt->addDescriptor(new BLE2902());
-  // pCharacteristicRightBelt->addDescriptor(new BLE2902());
   pService->start();
   pAdvertising = BLEDevice::getAdvertising();
   pAdvertising->addServiceUUID(serviceUUID);

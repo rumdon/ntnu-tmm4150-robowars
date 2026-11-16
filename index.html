@@ -412,8 +412,8 @@ setInterval(()=>{
     tread_offset_right = mod(tread_offset_right + val_to_offset_shift(r_speed),0.5);
 
 
-    document.getElementById("tread_inner_left").style="--deg: -10deg; --offset: " + (-tread_offset_left).toString() +"; filter: blur(" + (Math.abs(latest_d.speed_left)/64 -2).toString() + "px); --speed: " + latest_d.speed_left.toString();
-    document.getElementById("tread_inner_right").style="--deg: 10deg; --offset: " + (-tread_offset_right).toString() +"; filter: blur(" + (Math.abs(latest_d.speed_right)/64 -2).toString() + "px); --speed: " + latest_d.speed_right.toString();
+    document.getElementById("tread_inner_left").style="--deg: -5deg; --offset: " + (-tread_offset_left).toString() +"; filter: blur(" + (Math.abs(latest_d.speed_left)/64 -2).toString() + "px); --speed: " + latest_d.speed_left.toString();
+    document.getElementById("tread_inner_right").style="--deg: 5deg; --offset: " + (-tread_offset_right).toString() +"; filter: blur(" + (Math.abs(latest_d.speed_right)/64 -2).toString() + "px); --speed: " + latest_d.speed_right.toString();
 
     document.getElementById("battery").style="--pip: " + charge_to_pip(latest_d.charge).toString();
     

@@ -28,11 +28,6 @@ void ELRSTask()
   {
     crsf.sendHeartbeat();
   }
-
-  // if (INTERVAL(1000))
-  // {
-  //   printEverything();
-  // }
 }
 
 void printEverything()
